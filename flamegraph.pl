@@ -368,6 +368,18 @@ sub color {
 	}
 
 	# multi palettes
+	if (defined $type and $type eq "bitcoin") {
+		if ($name =~ /^(boost|leveldb)::/) { # C++ libs
+			$type = "yellow";
+		} elsif ($name =~ m:_\[b\]$:) {	# bitcoin annotation
+			$type = "green";
+		} elsif ($name =~ m:_\[k\]$:) {	# kernel annotation
+			$type = "aqua";
+		} else {			# system
+			$type = "red";
+		}
+		# fall-through to color palettes
+	}
 	if (defined $type and $type eq "java") {
 		# Handle both annotations (_[j], _[i], ...; which are
 		# accurate), as well as input that lacks any annotations, as
@@ -1068,7 +1080,7 @@ while (my ($id, $node) = each %Node) {
 		$escaped_func =~ s/</&lt;/g;
 		$escaped_func =~ s/>/&gt;/g;
 		$escaped_func =~ s/"/&quot;/g;
-		$escaped_func =~ s/_\[[kwij]\]$//;	# strip any annotation
+		$escaped_func =~ s/_\[[bkwij]\]$//;	# strip any annotation
 		unless (defined $delta) {
 			$info = "$escaped_func ($samples_txt $countname, $pct%)";
 		} else {
@@ -1104,7 +1116,7 @@ while (my ($id, $node) = each %Node) {
 	my $chars = int( ($x2 - $x1) / ($fontsize * $fontwidth));
 	my $text = "";
 	if ($chars >= 3) { # room for one char plus two dots
-		$func =~ s/_\[[kwij]\]$//;	# strip any annotation
+		$func =~ s/_\[[bkwij]\]$//;	# strip any annotation
 		$text = substr $func, 0, $chars;
 		substr($text, -2, 2) = ".." if $chars < length $func;
 		$text =~ s/&/&amp;/g;

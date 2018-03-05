@@ -72,6 +72,7 @@ sub remember_stack {
 	my ($stack, $count) = @_;
 	$collapsed{$stack} += $count;
 }
+my $annotate_bitcoin = 0; # add bitcoin annotations
 my $annotate_kernel = 0; # put an annotation on kernel function
 my $annotate_jit = 0;   # put an annotation on jit symbols
 my $annotate_all = 0;   # enale all annotations
@@ -89,6 +90,7 @@ my $event_warning = 0;	  # if we printed a warning for the event
 my $show_inline = 0;
 my $show_context = 0;
 GetOptions('inline' => \$show_inline,
+           'bitcoin' => \$annotate_bitcoin,
            'context' => \$show_context,
            'pid' => \$include_pid,
            'kernel' => \$annotate_kernel,
@@ -116,7 +118,7 @@ USAGE: $0 [options] infile > outfile\n
 USAGE_END
 
 if ($annotate_all) {
-	$annotate_kernel = $annotate_jit = 1;
+	$annotate_kernel = $annotate_jit = $annotate_bitcoin = 1;
 }
 
 # for the --inline option
@@ -326,6 +328,8 @@ while (defined($_ = <>)) {
 			#          7f722d142778 Ljava/io/PrintStream;::print (/tmp/perf-19982.map)
 			if (scalar(@inline) > 0) {
 				$func .= "_[i]";	# inlined
+			} elsif ($annotate_bitcoin == 1 && $mod =~ m/bitcoin/) {
+				$func .= "_[b]";	# bitcoin
 			} elsif ($annotate_kernel == 1 && $mod =~ m/(^\[|vmlinux$)/ && $mod !~ /unknown/) {
 				$func .= "_[k]";	# kernel
 			} elsif ($annotate_jit == 1 && $mod =~ m:/tmp/perf-\d+\.map:) {
